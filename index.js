@@ -13,12 +13,9 @@ const PORT = process.env.PORT || 3000;//project port
 
 app.get("/getethprice", async (req, res) => {
     try {
-        await Moralis.start({
-        apiKey: MORALIS_API_KEY,
-        })
       const response = await Moralis.EvmApi.token.getTokenPrice({
         address: process.env.ETH_ADDRESS,
-        chain: "0x1",//for etherum
+        chain: "0x1",
       });
       return res.status(200).json(response);
     } catch (e) {
@@ -28,12 +25,9 @@ app.get("/getethprice", async (req, res) => {
 
   app.get("/getblockinfo", async (req, res) => {
     try {
-        await Moralis.start({
-            apiKey: MORALIS_API_KEY,
-            })
       const latestBlock = await Moralis.EvmApi.block.getDateToBlock({
         date: Date.now(),
-        chain: "0x1",//for etherum
+        chain: "0x1",
       });
   
       let blockNrOrParentHash = latestBlock.toJSON().block;
@@ -75,16 +69,14 @@ app.get("/getethprice", async (req, res) => {
   
       return res.status(200).json(response);
     } catch (e) {
-      return res.status(400).json(e);
+      console.log(`Something went wrong ${e}`);
+      return res.status(400).json(e.message);
     }
   });
 
 
   app.get("/address", async (req, res) => {
   try {
-    await Moralis.start({
-        apiKey: MORALIS_API_KEY,
-      })
     const { query } = req;
     const chain = "0x1";//for ethereum 
     const response =
@@ -102,6 +94,12 @@ app.get("/getethprice", async (req, res) => {
 
 
 
-app.listen(PORT, () => {
-    console.log(`Listening for API Calls`);
+//we need to start the server and moralis server 
+//if we don't start the moralis server we will get an error that the module server can only hit the server once
+Moralis.start({
+  apiKey: MORALIS_API_KEY,
+}).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+  });
 });
